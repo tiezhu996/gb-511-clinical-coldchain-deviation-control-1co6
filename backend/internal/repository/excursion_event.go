@@ -16,6 +16,7 @@ type ExcursionEventRepository interface {
 	Update(context.Context, uint, uint, *model.ExcursionEvent, ...*model.AuditLog) error
 	Delete(context.Context, uint) error
 	CountByStatus(context.Context) (map[string]int64, error)
+	OpenForScope(context.Context, string, string) ([]model.ExcursionEvent, error)
 }
 
 type excursionEventRepository struct {
@@ -43,4 +44,14 @@ func (r *excursionEventRepository) Delete(ctx context.Context, id uint) error {
 }
 func (r *excursionEventRepository) CountByStatus(ctx context.Context) (map[string]int64, error) {
 	return r.store.CountByStatus(ctx)
+}
+
+// OpenForScope returns 未结束偏差 (status other than closed) for the given
+// product class and 场站, ordered by code for stable impact lists.
+func (r *excursionEventRepository) OpenForScope(ctx context.Context, productClass, facility string) ([]model.ExcursionEvent, error) {
+	items := make([]model.ExcursionEvent, 0)
+	err := r.store.db.WithContext(ctx).Model(&model.ExcursionEvent{}).
+		Where("status <> ? AND product_class = ? AND facility = ?", "closed", productClass, facility).
+		Order("code ASC").Find(&items).Error
+	return items, err
 }

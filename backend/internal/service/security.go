@@ -19,6 +19,11 @@ var (
 	ErrInvalidInput      = errors.New("business input validation failed")
 	ErrUnauthorized      = errors.New("invalid username or password")
 	ErrInactiveUser      = errors.New("user account is inactive")
+	// ErrActivationBlocked marks a draft 温控规则 whose 生效 was refused because
+	// in-transit containers or unfinished excursions still reference the same
+	// product class and 场站. The draft, its version and the superseded active
+	// rule are all left untouched.
+	ErrActivationBlocked = errors.New("temperature window activation is blocked by in-flight impact")
 )
 
 type SecurityService interface {

@@ -13,6 +13,7 @@ type TransportContainer struct {
 	Custodian         string    `json:"custodian" gorm:"size:120"`
 	CurrentTempC      float64   `json:"currentTempC"`
 	LastSensorReading time.Time `json:"lastSensorReading"`
+	ProductClass      string    `json:"productClass" gorm:"size:100;index"`
 	Facility          string    `json:"facility" gorm:"size:120;index"`
 	Owner             string    `json:"owner" gorm:"size:120;index"`
 	Category          string    `json:"category" gorm:"size:80;index"`

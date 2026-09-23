@@ -29,6 +29,13 @@ func Fail(c *gin.Context, status int, code, message string) {
 	c.AbortWithStatusJSON(status, Envelope{Error: code, Message: message})
 }
 
+// FailWithMeta behaves like Fail but attaches structured metadata, used to
+// return business-blocking details such as the impact list that refused a
+// temperature window activation.
+func FailWithMeta(c *gin.Context, status int, code, message string, meta any) {
+	c.AbortWithStatusJSON(status, Envelope{Error: code, Message: message, Meta: meta})
+}
+
 func Page(c *gin.Context, data any, page, pageSize int, total int64) {
 	c.JSON(http.StatusOK, Envelope{
 		Data: data,

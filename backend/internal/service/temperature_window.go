@@ -22,13 +22,26 @@ type TemperatureWindowService interface {
 	StatusCounts(context.Context) (map[string]int64, error)
 }
 
+// ActivationBlockedError carries the persisted draft (with block metadata) back
+// to the HTTP layer so the 422 response can include the impact list while the
+// draft itself remains unchanged.
+type ActivationBlockedError struct {
+	Window model.TemperatureWindow
+	Reason string
+}
+
+func (e *ActivationBlockedError) Error() string { return e.Reason }
+func (e *ActivationBlockedError) Unwrap() error { return ErrActivationBlocked }
+
 type temperatureWindowService struct {
 	repository repository.TemperatureWindowRepository
+	containers repository.TransportContainerRepository
+	excursions repository.ExcursionEventRepository
 	security   SecurityService
 }
 
-func NewTemperatureWindowService(repo repository.TemperatureWindowRepository, security SecurityService) TemperatureWindowService {
-	return &temperatureWindowService{repository: repo, security: security}
+func NewTemperatureWindowService(repo repository.TemperatureWindowRepository, containers repository.TransportContainerRepository, excursions repository.ExcursionEventRepository, security SecurityService) TemperatureWindowService {
+	return &temperatureWindowService{repository: repo, containers: containers, excursions: excursions, security: security}
 }
 
 func (s *temperatureWindowService) List(ctx context.Context, query dto.PageQuery) (repository.Page[model.TemperatureWindow], error) {
@@ -116,6 +129,9 @@ func (s *temperatureWindowService) Transition(ctx context.Context, id uint, inpu
 	if !constants.CanTransition(constants.TemperatureWindowTransitions, current.Status, target) {
 		return model.TemperatureWindow{}, fmt.Errorf("%w: %s -> %s", ErrInvalidTransition, current.Status, target)
 	}
+	if target == "active" {
+		return s.activate(ctx, current, input.ExpectedVersion, input.Reason, actor, requestID)
+	}
 	before := current.Status
 	current.Status = target
 	current.Version = input.ExpectedVersion + 1
@@ -127,6 +143,67 @@ func (s *temperatureWindowService) Transition(ctx context.Context, id uint, inpu
 		return model.TemperatureWindow{}, fmt.Errorf("persist transition audit: %w", err)
 	}
 	return s.repository.Get(ctx, id)
+}
+
+// activate performs the impact check before a draft 温控规则 becomes effective.
+// Any 仍在途容器 or 未结束偏差 for the same product class and 场站 blocks the whole
+// activation: the draft keeps its status and version, the previous active rule
+// is not touched, and the blocking codes plus reason are persisted on the draft
+// so they remain readable after the failed response. Once the impacts are
+// cleared, submitting again activates the draft and supersedes the old rule.
+func (s *temperatureWindowService) activate(ctx context.Context, current model.TemperatureWindow, expectedVersion uint, reason, actor, requestID string) (model.TemperatureWindow, error) {
+	productClass := strings.TrimSpace(current.ProductClass)
+	facility := strings.TrimSpace(current.Facility)
+
+	containers, err := s.containers.InTransitForScope(ctx, productClass, facility)
+	if err != nil {
+		return model.TemperatureWindow{}, fmt.Errorf("check in-transit containers: %w", err)
+	}
+	excursions, err := s.excursions.OpenForScope(ctx, productClass, facility)
+	if err != nil {
+		return model.TemperatureWindow{}, fmt.Errorf("check unfinished excursions: %w", err)
+	}
+
+	if len(containers) > 0 || len(excursions) > 0 {
+		impacts := make([]model.ActivationImpact, 0, len(containers)+len(excursions))
+		details := make([]string, 0, len(containers)+len(excursions))
+		for _, container := range containers {
+			impacts = append(impacts, model.ActivationImpact{Type: "container", Code: container.Code, Name: container.Name, Status: container.Status})
+			details = append(details, fmt.Sprintf("container:%s", container.Code))
+		}
+		for _, excursion := range excursions {
+			impacts = append(impacts, model.ActivationImpact{Type: "excursion", Code: excursion.Code, Name: excursion.Name, Status: excursion.Status})
+			details = append(details, fmt.Sprintf("excursion:%s", excursion.Code))
+		}
+		blockReason := fmt.Sprintf("blocked by %d in-flight impact(s): %s", len(impacts), strings.Join(details, ", "))
+		blockedAt := time.Now().UTC()
+		// Persist the block metadata only; status, version and the existing
+		// active rule all stay unchanged, so a retry with the same
+		// expectedVersion remains valid after the impacts are resolved.
+		if persistErr := s.repository.RecordActivationBlock(ctx, current.ID, blockReason, impacts, blockedAt); persistErr != nil {
+			return model.TemperatureWindow{}, fmt.Errorf("persist activation block: %w", persistErr)
+		}
+		_ = s.security.Audit(ctx, actor, requestID, "activation_blocked", "TemperatureWindow", current.ID, current.Status, current.Status, blockReason)
+		blocked, getErr := s.repository.Get(ctx, current.ID)
+		if getErr != nil {
+			return model.TemperatureWindow{}, getErr
+		}
+		return blocked, &ActivationBlockedError{Window: blocked, Reason: blockReason}
+	}
+
+	before := current.Status
+	now := time.Now().UTC()
+	current.Status = "active"
+	current.Version = expectedVersion + 1
+	current.UpdatedAt = now
+	current.LastBlockedAt = nil
+	current.LastBlockReason = ""
+	current.LastBlockImpact = nil
+	audit := auditLog(actor, requestID, "transition", "TemperatureWindow", current.ID, before, "active", reason)
+	if err := s.repository.ActivateWithSupersession(ctx, current.ID, expectedVersion, current, productClass, facility, audit); err != nil {
+		return model.TemperatureWindow{}, fmt.Errorf("transition 温控规则: %w", err)
+	}
+	return s.repository.Get(ctx, current.ID)
 }
 
 func (s *temperatureWindowService) Delete(ctx context.Context, id uint, actor, requestID string) error {

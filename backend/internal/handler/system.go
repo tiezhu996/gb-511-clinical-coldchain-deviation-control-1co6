@@ -23,6 +23,21 @@ func handleError(c *gin.Context, err error) {
 		util.Fail(c, http.StatusConflict, "version_conflict", "record changed; refresh and retry")
 	case errors.Is(err, service.ErrInvalidTransition), errors.Is(err, service.ErrInvalidInput):
 		util.Fail(c, http.StatusUnprocessableEntity, "business_rule", err.Error())
+	case errors.Is(err, service.ErrActivationBlocked):
+		var blocked *service.ActivationBlockedError
+		if errors.As(err, &blocked) {
+			util.FailWithMeta(c, http.StatusUnprocessableEntity, "activation_blocked", err.Error(), gin.H{
+				"windowId":        blocked.Window.ID,
+				"windowCode":      blocked.Window.Code,
+				"productClass":    blocked.Window.ProductClass,
+				"facility":        blocked.Window.Facility,
+				"lastBlockedAt":   blocked.Window.LastBlockedAt,
+				"lastBlockReason": blocked.Window.LastBlockReason,
+				"impacts":         blocked.Window.LastBlockImpact,
+			})
+			return
+		}
+		util.Fail(c, http.StatusUnprocessableEntity, "activation_blocked", err.Error())
 	default:
 		_ = c.Error(err)
 		util.Fail(c, http.StatusInternalServerError, "internal_error", "request could not be completed")

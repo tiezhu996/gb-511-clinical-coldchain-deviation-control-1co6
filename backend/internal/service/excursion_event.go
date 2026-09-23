@@ -56,6 +56,7 @@ func (s *excursionEventService) Create(ctx context.Context, input dto.CreateExcu
 		MetricValue: input.MetricValue, MetricUnit: strings.TrimSpace(input.MetricUnit),
 		EffectiveAt: input.EffectiveAt.UTC(), Evidence: strings.TrimSpace(input.Evidence),
 		RelatedCode:   strings.ToUpper(strings.TrimSpace(input.RelatedCode)),
+		ProductClass:  strings.TrimSpace(firstNonEmpty(input.ProductClass, input.Category)),
 		ContainerCode: strings.ToUpper(strings.TrimSpace(firstNonEmpty(input.ContainerCode, input.RelatedCode))),
 		WindowCode:    strings.ToUpper(strings.TrimSpace(input.WindowCode)),
 		ObservedTempC: input.ObservedTempC, DurationMinutes: input.DurationMinutes,
@@ -95,6 +96,7 @@ func (s *excursionEventService) Update(ctx context.Context, id uint, input dto.U
 	current.EffectiveAt = input.EffectiveAt.UTC()
 	current.Evidence = strings.TrimSpace(input.Evidence)
 	current.RelatedCode = strings.ToUpper(strings.TrimSpace(input.RelatedCode))
+	current.ProductClass = strings.TrimSpace(firstNonEmpty(input.ProductClass, input.Category))
 	current.ContainerCode = strings.ToUpper(strings.TrimSpace(firstNonEmpty(input.ContainerCode, input.RelatedCode)))
 	current.WindowCode = strings.ToUpper(strings.TrimSpace(input.WindowCode))
 	current.ObservedTempC = input.ObservedTempC

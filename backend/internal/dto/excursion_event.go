@@ -17,6 +17,7 @@ type CreateExcursionEvent struct {
 	EffectiveAt     time.Time `json:"effectiveAt" binding:"required"`
 	Evidence        string    `json:"evidence" binding:"max=2000"`
 	RelatedCode     string    `json:"relatedCode" binding:"max=64"`
+	ProductClass    string    `json:"productClass" binding:"max:100"`
 	ContainerCode   string    `json:"containerCode" binding:"max=64"`
 	WindowCode      string    `json:"windowCode" binding:"max=64"`
 	ObservedTempC   float64   `json:"observedTempC"`
@@ -39,6 +40,7 @@ type UpdateExcursionEvent struct {
 	EffectiveAt     time.Time `json:"effectiveAt" binding:"required"`
 	Evidence        string    `json:"evidence" binding:"max=2000"`
 	RelatedCode     string    `json:"relatedCode" binding:"max=64"`
+	ProductClass    string    `json:"productClass" binding:"max:100"`
 	ContainerCode   string    `json:"containerCode" binding:"max=64"`
 	WindowCode      string    `json:"windowCode" binding:"max=64"`
 	ObservedTempC   float64   `json:"observedTempC"`

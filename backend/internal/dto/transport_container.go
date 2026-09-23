@@ -17,6 +17,7 @@ type CreateTransportContainer struct {
 	EffectiveAt       time.Time `json:"effectiveAt" binding:"required"`
 	Evidence          string    `json:"evidence" binding:"max=2000"`
 	RelatedCode       string    `json:"relatedCode" binding:"max=64"`
+	ProductClass      string    `json:"productClass" binding:"max=100"`
 	SensorID          string    `json:"sensorId" binding:"max=80"`
 	ContainerType     string    `json:"containerType" binding:"max=80"`
 	CurrentLocation   string    `json:"currentLocation" binding:"max=120"`
@@ -38,6 +39,7 @@ type UpdateTransportContainer struct {
 	EffectiveAt       time.Time `json:"effectiveAt" binding:"required"`
 	Evidence          string    `json:"evidence" binding:"max=2000"`
 	RelatedCode       string    `json:"relatedCode" binding:"max=64"`
+	ProductClass      string    `json:"productClass" binding:"max=100"`
 	SensorID          string    `json:"sensorId" binding:"max=80"`
 	ContainerType     string    `json:"containerType" binding:"max=80"`
 	CurrentLocation   string    `json:"currentLocation" binding:"max=120"`

@@ -2,6 +2,14 @@ package model
 
 import "time"
 
+// ActivationImpact is one item that prevents a draft 温控规则 from becoming active.
+type ActivationImpact struct {
+	Type   string `json:"type"`
+	Code   string `json:"code"`
+	Name   string `json:"name"`
+	Status string `json:"status"`
+}
+
 // TemperatureWindow models 温控规则 as an independently versioned aggregate. The fields
 // cover ownership, operational context, evidence and measured risk so later
 // changes naturally span persistence, service and UI layers.
@@ -21,6 +29,13 @@ type TemperatureWindow struct {
 	EffectiveAt         time.Time `json:"effectiveAt"`
 	Evidence            string    `json:"evidence" gorm:"size:2000"`
 	RelatedCode         string    `json:"relatedCode" gorm:"size:64;index"`
+	// LastBlockedAt / LastBlockReason / LastBlockImpact record the most recent
+	// failed 生效 attempt. They are written without changing draft/version and
+	// cleared once the rule becomes active, so the page can still read back why
+	// the previous submission was blocked.
+	LastBlockedAt   *time.Time         `json:"lastBlockedAt,omitempty" gorm:"index"`
+	LastBlockReason string             `json:"lastBlockReason" gorm:"size:1000;not null;default:''"`
+	LastBlockImpact []ActivationImpact `json:"lastBlockImpact,omitempty" gorm:"type:text;serializer:json"`
 }
 
 func (item *TemperatureWindow) GetBase() *BaseModel { return &item.BaseModel }

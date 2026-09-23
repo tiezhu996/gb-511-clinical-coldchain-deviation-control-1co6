@@ -40,6 +40,28 @@ export interface DomainRecord {
   decidedAt?: string | null;
   createdAt: string;
   updatedAt: string;
+  lastBlockedAt?: string;
+  lastBlockReason?: string;
+  lastBlockImpact?: ActivationImpact[];
+}
+
+export type ActivationImpactType = 'container' | 'excursion';
+
+export interface ActivationImpact {
+  type: ActivationImpactType;
+  code: string;
+  name: string;
+  status: string;
+}
+
+export interface ActivationBlockMeta {
+  windowId: number;
+  windowCode: string;
+  productClass: string;
+  facility: string;
+  lastBlockedAt?: string;
+  lastBlockReason?: string;
+  impacts?: ActivationImpact[];
 }
 
 export interface PageMeta { page: number; pageSize: number; total: number }

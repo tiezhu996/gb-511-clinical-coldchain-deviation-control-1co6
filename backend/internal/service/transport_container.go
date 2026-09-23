@@ -53,6 +53,7 @@ func (s *transportContainerService) Create(ctx context.Context, input dto.Create
 		MetricValue: input.MetricValue, MetricUnit: strings.TrimSpace(input.MetricUnit),
 		EffectiveAt: input.EffectiveAt.UTC(), Evidence: strings.TrimSpace(input.Evidence),
 		RelatedCode:       strings.ToUpper(strings.TrimSpace(input.RelatedCode)),
+		ProductClass:      strings.TrimSpace(firstNonEmpty(input.ProductClass, input.Category)),
 		SensorID:          strings.ToUpper(strings.TrimSpace(firstNonEmpty(input.SensorID, input.RelatedCode))),
 		ContainerType:     strings.TrimSpace(firstNonEmpty(input.ContainerType, input.Category)),
 		CurrentLocation:   strings.TrimSpace(firstNonEmpty(input.CurrentLocation, input.Facility)),
@@ -92,6 +93,7 @@ func (s *transportContainerService) Update(ctx context.Context, id uint, input d
 	current.EffectiveAt = input.EffectiveAt.UTC()
 	current.Evidence = strings.TrimSpace(input.Evidence)
 	current.RelatedCode = strings.ToUpper(strings.TrimSpace(input.RelatedCode))
+	current.ProductClass = strings.TrimSpace(firstNonEmpty(input.ProductClass, input.Category))
 	current.SensorID = strings.ToUpper(strings.TrimSpace(firstNonEmpty(input.SensorID, input.RelatedCode)))
 	current.ContainerType = strings.TrimSpace(firstNonEmpty(input.ContainerType, input.Category))
 	current.CurrentLocation = strings.TrimSpace(firstNonEmpty(input.CurrentLocation, input.Facility))

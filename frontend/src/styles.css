@@ -64,3 +64,24 @@ td small { display: block; color: #7d8d97; margin-top: 4px; }
 .login-shell { min-height: 100vh; display: grid; grid-template-columns: minmax(360px, 1.05fr) minmax(420px, .95fr); background: #f2f5f5; }.login-context { display: flex; flex-direction: column; justify-content: center; padding: 9vh 9vw; background: #202b2f; color: white; }.login-context > p { margin: 20px 0 8px; color: #67cbae; font-size: 11px; font-weight: 800; }.login-context h1 { margin: 0; font-size: 44px; line-height: 1.25; letter-spacing: 0; }.login-context > span { max-width: 520px; margin-top: 22px; color: #bdcbc8; line-height: 1.8; }.login-mark { width: 50px; height: 50px; display: grid; place-items: center; background: #e5f4ef; color: #1f8167; border-radius: 5px; }.login-signals { display: flex; gap: 8px; margin-top: 42px; }.login-signals strong { padding: 6px 9px; border: 1px solid #49605d; color: #d7e3e0; font-size: 10px; }.login-panel { display: grid; place-items: center; padding: 32px; }.login-panel form { width: min(390px, 100%); display: grid; gap: 16px; }.login-panel h2 { margin: -8px 0 10px; font-size: 27px; }.login-panel form > p { margin: 0; color: #2a8c70; font-size: 11px; font-weight: 800; }.login-panel form > small { color: #728189; line-height: 1.5; }.login-lock { color: #2a8c70; }
 @media (max-width: 1000px) { .split-workspace { grid-template-columns: 1fr; }.record-list { min-height: 250px; max-height: 360px; } }
 @media (max-width: 900px) { .app-shell { grid-template-columns: 1fr; } .app-shell > aside { position: static; height: auto; } .app-shell > aside nav { grid-template-columns: repeat(2, 1fr); } .user-panel { display: none; } .metrics { grid-template-columns: 1fr; } .workspace { padding: 18px; } .page-header { flex-direction: column; } .login-shell { grid-template-columns: 1fr; }.login-context { padding: 30px 24px; }.login-context h1 { font-size: 30px; }.login-context > span, .login-signals { display: none; }.login-panel { padding: 42px 24px; } }
+.block-panel { margin: 0 0 16px; padding: 16px 18px; border: 1px solid #f0c9ce; border-left: 4px solid #c84855; background: #fdf4f5; color: #7c2b34; }
+.block-panel header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.block-panel header svg { width: 22px; height: 22px; color: #c84855; }
+.block-panel header strong { display: block; font-size: 14px; color: #922b34; }
+.block-panel header small { display: block; color: #996a70; font-size: 12px; margin-top: 2px; }
+.block-panel h4 { margin: 12px 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #922b34; }
+.block-reason { margin: 0 0 6px; font-size: 13px; font-weight: 650; }
+.block-hint { margin: 8px 0 0; font-size: 12px; color: #8a6066; line-height: 1.6; }
+.block-time { margin: 6px 0; font-size: 12px; color: #996a70; }
+.impact-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 260px; overflow: auto; }
+.impact-item { display: grid; grid-template-columns: 32px 1fr auto; gap: 10px; align-items: center; padding: 9px 11px; background: white; border: 1px solid #f0dadd; }
+.impact-icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 3px; background: #fde8ea; color: #b13a47; }
+.impact-icon svg { width: 18px; height: 18px; }
+.impact-item--excursion .impact-icon { background: #fff1ce; color: #8a5a08; }
+.impact-body strong { display: block; font-size: 13px; color: #33464e; }
+.impact-body small { display: block; color: #7d8d97; font-size: 12px; margin-top: 2px; }
+.impact-empty { margin: 4px 0; font-size: 12px; color: #996a70; }
+tr.row-blocked { background: #fdf8f8; }
+.block-chip { color: #b13a47 !important; font-weight: 650; }
+.modal .block-panel { margin: 10px 0 4px; padding: 12px 14px; }
+.modal .impact-list { max-height: 220px; }

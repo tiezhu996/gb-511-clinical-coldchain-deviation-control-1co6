@@ -16,6 +16,7 @@ type TransportContainerRepository interface {
 	Update(context.Context, uint, uint, *model.TransportContainer) error
 	Delete(context.Context, uint) error
 	CountByStatus(context.Context) (map[string]int64, error)
+	InTransitForScope(context.Context, string, string) ([]model.TransportContainer, error)
 }
 
 type transportContainerRepository struct {
@@ -43,4 +44,14 @@ func (r *transportContainerRepository) Delete(ctx context.Context, id uint) erro
 }
 func (r *transportContainerRepository) CountByStatus(ctx context.Context) (map[string]int64, error) {
 	return r.store.CountByStatus(ctx)
+}
+
+// InTransitForScope returns containers that are still 仍在途 (status in_transit)
+// for the given product class and 场站, ordered by code for stable impact lists.
+func (r *transportContainerRepository) InTransitForScope(ctx context.Context, productClass, facility string) ([]model.TransportContainer, error) {
+	items := make([]model.TransportContainer, 0)
+	err := r.store.db.WithContext(ctx).Model(&model.TransportContainer{}).
+		Where("status = ? AND product_class = ? AND facility = ?", "in_transit", productClass, facility).
+		Order("code ASC").Find(&items).Error
+	return items, err
 }

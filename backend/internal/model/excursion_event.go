@@ -14,6 +14,7 @@ type ExcursionEvent struct {
 	DetectedAt      time.Time `json:"detectedAt" gorm:"index"`
 	SensorEvidence  string    `json:"sensorEvidence" gorm:"size:2000"`
 	Reviewer        string    `json:"reviewer" gorm:"size:80"`
+	ProductClass    string    `json:"productClass" gorm:"size:100;index"`
 	Facility        string    `json:"facility" gorm:"size:120;index"`
 	Owner           string    `json:"owner" gorm:"size:120;index"`
 	Category        string    `json:"category" gorm:"size:80;index"`
