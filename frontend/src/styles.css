@@ -63,4 +63,25 @@ td small { display: block; color: #7d8d97; margin-top: 4px; }
 .audit-integrity { min-height: 54px; display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 10px 14px; border: 1px solid #bddfd3; background: #eef8f4; color: #53676e; font-size: 12px; }.audit-integrity svg { color: #2a8c70; }.audit-integrity strong { display: block; color: #23483e; }.audit-detail { max-height: 280px; overflow: auto; margin: 0; padding: 16px; border-top: 1px solid #d7e0e2; background: #202b2f; color: #c8f0df; font-size: 12px; line-height: 1.6; }
 .login-shell { min-height: 100vh; display: grid; grid-template-columns: minmax(360px, 1.05fr) minmax(420px, .95fr); background: #f2f5f5; }.login-context { display: flex; flex-direction: column; justify-content: center; padding: 9vh 9vw; background: #202b2f; color: white; }.login-context > p { margin: 20px 0 8px; color: #67cbae; font-size: 11px; font-weight: 800; }.login-context h1 { margin: 0; font-size: 44px; line-height: 1.25; letter-spacing: 0; }.login-context > span { max-width: 520px; margin-top: 22px; color: #bdcbc8; line-height: 1.8; }.login-mark { width: 50px; height: 50px; display: grid; place-items: center; background: #e5f4ef; color: #1f8167; border-radius: 5px; }.login-signals { display: flex; gap: 8px; margin-top: 42px; }.login-signals strong { padding: 6px 9px; border: 1px solid #49605d; color: #d7e3e0; font-size: 10px; }.login-panel { display: grid; place-items: center; padding: 32px; }.login-panel form { width: min(390px, 100%); display: grid; gap: 16px; }.login-panel h2 { margin: -8px 0 10px; font-size: 27px; }.login-panel form > p { margin: 0; color: #2a8c70; font-size: 11px; font-weight: 800; }.login-panel form > small { color: #728189; line-height: 1.5; }.login-lock { color: #2a8c70; }
 @media (max-width: 1000px) { .split-workspace { grid-template-columns: 1fr; }.record-list { min-height: 250px; max-height: 360px; } }
+
+.modal { width: min(560px, calc(100vw - 32px)); }
+.impact-check { display: grid; gap: 12px; }
+.impact-check .impact-scope { margin: 0; padding: 10px 12px; background: #f4f7f8; color: #4e626a; font-size: 13px; }
+.impact-group h4 { display: flex; align-items: center; gap: 6px; margin: 2px 0 7px; font-size: 13px; color: #33464e; }
+.impact-group h4 svg { width: 17px; height: 17px; color: #2a8c70; }
+.impact-list { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; }
+.impact-list li { padding: 5px 9px; border: 1px solid #e3c2c6; background: #fdeef0; color: #9d2c37; font-size: 12px; font-weight: 700; }
+.impact-empty { margin: 0; color: #176c55; font-size: 12px; }
+.impact-blocked { margin: 2px 0 0; padding: 10px 12px; border-left: 4px solid #c84855; background: #fde8ea; color: #922b34; font-size: 12px; line-height: 1.6; }
+.impact-clear { display: flex; align-items: center; gap: 7px; margin: 2px 0 0; padding: 10px 12px; border-left: 4px solid #2a9d78; background: #eef8f4; color: #176c55; font-size: 12px; line-height: 1.6; }
+.impact-clear svg { width: 17px; height: 17px; flex: 0 0 auto; }
+.impact-history { margin: 0; padding: 9px 12px; background: #fbf4e4; border-left: 4px solid #d7a634; color: #7a5a12; font-size: 12px; line-height: 1.6; }
+.impact-loading { margin: 0; color: #176c55; font-size: 13px; }
+.block-note { margin-top: 8px; padding: 8px 10px; background: #fde8ea; border-left: 3px solid #c84855; color: #922b34; font-size: 11px; line-height: 1.6; }
+.block-note--history { background: #f4f7f8; border-left-color: #9db4be; color: #5a6b76; }
+.block-note strong { display: block; margin-bottom: 2px; }
+.block-codes { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; }
+.block-codes small { color: #7a2730; font-weight: 700; }
+.block-note--history .block-codes small { color: #485a64; }
+tr.row-blocked { background: #fff8f9; }
 @media (max-width: 900px) { .app-shell { grid-template-columns: 1fr; } .app-shell > aside { position: static; height: auto; } .app-shell > aside nav { grid-template-columns: repeat(2, 1fr); } .user-panel { display: none; } .metrics { grid-template-columns: 1fr; } .workspace { padding: 18px; } .page-header { flex-direction: column; } .login-shell { grid-template-columns: 1fr; }.login-context { padding: 30px 24px; }.login-context h1 { font-size: 30px; }.login-context > span, .login-signals { display: none; }.login-panel { padding: 42px 24px; } }

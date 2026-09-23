@@ -16,6 +16,7 @@ type ExcursionEventRepository interface {
 	Update(context.Context, uint, uint, *model.ExcursionEvent, ...*model.AuditLog) error
 	Delete(context.Context, uint) error
 	CountByStatus(context.Context) (map[string]int64, error)
+	ListUnfinishedInScope(context.Context, string, string) ([]model.ExcursionEvent, error)
 }
 
 type excursionEventRepository struct {
@@ -43,4 +44,36 @@ func (r *excursionEventRepository) Delete(ctx context.Context, id uint) error {
 }
 func (r *excursionEventRepository) CountByStatus(ctx context.Context) (map[string]int64, error) {
 	return r.store.CountByStatus(ctx)
+}
+
+// ListUnfinishedInScope returns excursions that are not closed (open, in_review or
+// decided) and belong to the product class + facility scope. An excursion is in scope when
+// it references either a window or a container carrying that product class at that facility.
+func (r *excursionEventRepository) ListUnfinishedInScope(ctx context.Context, productClass, facility string) ([]model.ExcursionEvent, error) {
+	var windowCodes []string
+	if err := r.store.db.WithContext(ctx).Model(&model.TemperatureWindow{}).
+		Where("LOWER(product_class) = LOWER(?) AND LOWER(facility) = LOWER(?)", productClass, facility).
+		Pluck("code", &windowCodes).Error; err != nil {
+		return nil, err
+	}
+	var containerCodes []string
+	if err := r.store.db.WithContext(ctx).Model(&model.TransportContainer{}).
+		Where("LOWER(category) = LOWER(?) AND LOWER(facility) = LOWER(?)", productClass, facility).
+		Pluck("code", &containerCodes).Error; err != nil {
+		return nil, err
+	}
+	items := make([]model.ExcursionEvent, 0)
+	if len(windowCodes) == 0 && len(containerCodes) == 0 {
+		return items, nil
+	}
+	db := r.store.db.WithContext(ctx).Where("status IN ?", []string{"open", "in_review", "decided"})
+	if len(windowCodes) > 0 && len(containerCodes) > 0 {
+		db = db.Where("window_code IN ? OR container_code IN ?", windowCodes, containerCodes)
+	} else if len(windowCodes) > 0 {
+		db = db.Where("window_code IN ?", windowCodes)
+	} else {
+		db = db.Where("container_code IN ?", containerCodes)
+	}
+	err := db.Order("updated_at DESC, id DESC").Find(&items).Error
+	return items, err
 }

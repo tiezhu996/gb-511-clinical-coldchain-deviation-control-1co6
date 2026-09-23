@@ -38,8 +38,24 @@ export interface DomainRecord {
   proposedBy?: string;
   approvedBy?: string;
   decidedAt?: string | null;
+  blockedContainerCodes?: string[];
+  blockedExcursionCodes?: string[];
+  lastBlockedReason?: string;
+  lastBlockedAt?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ActivationImpact {
+  windowId: number;
+  windowCode: string;
+  productClass: string;
+  facility: string;
+  containerCodes: string[];
+  excursionCodes: string[];
+  blocked: boolean;
+  lastBlockedReason?: string;
+  lastBlockedAt?: string | null;
 }
 
 export interface PageMeta { page: number; pageSize: number; total: number }

@@ -1,6 +1,6 @@
 
 import { request } from './client';
-import type { DomainRecord } from '../types/domain';
+import type { ActivationImpact, DomainRecord } from '../types/domain';
 
 export async function listTemperatureWindow(page = 1, pageSize = 20, search = '') {
   return request<DomainRecord[]>(`/windows?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`);
@@ -12,4 +12,8 @@ export async function transitionTemperatureWindow(id: number, status: string, ex
   return request<DomainRecord>(`/windows/${id}/transition`, {
     method: 'POST', body: JSON.stringify({ status, expectedVersion, reason }),
   });
+}
+
+export async function getActivationImpact(id: number) {
+  return request<ActivationImpact>(`/windows/${id}/activation-impact`);
 }

@@ -16,6 +16,7 @@ type TransportContainerRepository interface {
 	Update(context.Context, uint, uint, *model.TransportContainer) error
 	Delete(context.Context, uint) error
 	CountByStatus(context.Context) (map[string]int64, error)
+	ListInTransitInScope(context.Context, string, string) ([]model.TransportContainer, error)
 }
 
 type transportContainerRepository struct {
@@ -43,4 +44,14 @@ func (r *transportContainerRepository) Delete(ctx context.Context, id uint) erro
 }
 func (r *transportContainerRepository) CountByStatus(ctx context.Context) (map[string]int64, error) {
 	return r.store.CountByStatus(ctx)
+}
+
+// ListInTransitInScope returns containers that are still on the road (status in_transit)
+// for the same product class (stored as the container category) and facility.
+func (r *transportContainerRepository) ListInTransitInScope(ctx context.Context, productClass, facility string) ([]model.TransportContainer, error) {
+	items := make([]model.TransportContainer, 0)
+	err := r.store.db.WithContext(ctx).
+		Where("status = ? AND LOWER(category) = LOWER(?) AND LOWER(facility) = LOWER(?)", "in_transit", productClass, facility).
+		Order("updated_at DESC, id DESC").Find(&items).Error
+	return items, err
 }

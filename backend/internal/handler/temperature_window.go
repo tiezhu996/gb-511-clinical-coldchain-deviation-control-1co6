@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/blueship581/clinical-coldchain-deviation-control/backend/internal/dto"
@@ -22,6 +23,7 @@ func (h *TemperatureWindowHandler) Register(group *gin.RouterGroup) {
 	resource := group.Group("/windows")
 	resource.GET("", h.list)
 	resource.GET("/:id", h.get)
+	resource.GET("/:id/activation-impact", h.activationImpact)
 	resource.POST("", middleware.RequireMinimumRole("reviewer"), h.create)
 	resource.PUT("/:id", middleware.RequireMinimumRole("reviewer"), h.update)
 	resource.POST("/:id/transition", middleware.RequireMinimumRole("reviewer"), h.transition)
@@ -49,6 +51,19 @@ func (h *TemperatureWindowHandler) get(c *gin.Context) {
 		return
 	}
 	util.OK(c, item)
+}
+
+func (h *TemperatureWindowHandler) activationImpact(c *gin.Context) {
+	id, ok := parseID(c)
+	if !ok {
+		return
+	}
+	impact, err := h.service.ActivationImpact(c.Request.Context(), id)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+	util.OK(c, impact)
 }
 
 func (h *TemperatureWindowHandler) create(c *gin.Context) {
@@ -95,6 +110,15 @@ func (h *TemperatureWindowHandler) transition(c *gin.Context) {
 	}
 	item, err := h.service.Transition(c.Request.Context(), id, input, actorFromContext(c), requestIDFromContext(c))
 	if err != nil {
+		var blocked *service.ActivationBlockedError
+		if errors.As(err, &blocked) {
+			c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   "activation_blocked",
+				"message": blocked.Impact.LastBlockedReason,
+				"data":    blocked.Impact,
+			})
+			return
+		}
 		handleError(c, err)
 		return
 	}

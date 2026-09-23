@@ -11,6 +11,7 @@ export interface EntityState {
   load: (path: string, search?: string) => Promise<void>;
   createRecord: (path: string, input: Partial<DomainRecord>) => Promise<void>;
   transition: (path: string, item: DomainRecord, status: string, reason?: string, evidence?: string) => Promise<void>;
+  clearError: () => void;
 }
 export type EntityStore = ReturnType<typeof createEntityStore>;
 
@@ -38,5 +39,6 @@ export function createEntityStore() {
         await get().load(path);
       } catch (error) { set({ error: error instanceof Error ? error.message : String(error), loading: false }); throw error; }
     },
+    clearError: () => set({ error: '' }),
   }));
 }

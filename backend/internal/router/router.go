@@ -41,7 +41,7 @@ func New(cfg config.Config, db *gorm.DB, redisClient *redis.Client, logger *slog
 		minioClient = nil
 	}
 	transportContainerService := service.NewTransportContainerService(transportContainerRepository, securityService)
-	temperatureWindowService := service.NewTemperatureWindowService(temperatureWindowRepository, securityService)
+	temperatureWindowService := service.NewTemperatureWindowService(temperatureWindowRepository, transportContainerRepository, excursionEventRepository, securityService)
 	excursionEventService := service.NewExcursionEventService(excursionEventRepository, dispositionDecisionRepository, sensorEvidenceRepository, securityService)
 	dispositionDecisionService := service.NewDispositionDecisionService(dispositionDecisionRepository, sensorEvidenceRepository, securityService)
 	sensorEvidenceService := service.NewSensorEvidenceService(sensorEvidenceRepository, minioClient, cfg.MinIOBucket)
